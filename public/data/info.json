@@ -1,0 +1,36 @@
+[
+    [
+        {
+            "city":"广州",
+            "street":"白云区棠景街道",
+            "district":"乐嘉大厦",
+            "houseType":"单间",
+            "owner":"李先森",
+            "photo":[
+                {
+                    "p1":"/images/a1.png",
+                    "p2":"/images/a2.png",
+                    "p3":"/images/a3.png"
+                }
+            ],
+            "phone":"13922222222"
+        }
+    ],
+    [
+        {
+            "city":"广州",
+            "street":"白云区棠景街道",
+            "district":"乐嘉大厦",
+            "houseType":"两房一厅",
+            "owner":"刘先森",
+            "photo":[
+                {
+                    "p1":"/images/a1.png",
+                    "p2":"/images/a2.png",
+                    "p3":"/images/a3.png"
+                }
+            ],
+            "phone":"13933322222"
+        }
+    ]
+]

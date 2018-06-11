@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="/stylesheets/index.css">
+    <link rel="stylesheet" href="/stylesheets/house.css">
+    <title>后台管理系统</title>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <p>在线房源</p>
+        <div>
+            <a href="">
+                <img src="/images/user.png" alt="">
+            </a>
+            <div class="admin-name">
+                <span>admin</span>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <table id="show-info">
+            <tr>
+                <th>所在城市</th>
+                <th>位置信息</th>
+                <th>小区名字</th>
+                <th>户型信息</th>
+                <th>楼房图片</th>
+                <th>当前户主</th>
+                <th>联系电话</th>
+                <th>操作</th>
+            </tr>
+        </table>
+    </div>
+    <div class="container">
+        <div class="handle">
+            <form action="" enctype="multipart/form-data">
+                <div>
+                    <span>所在城市</span>
+                    <input type="text">
+                </div>
+                <div>
+                    <span>地理位置</span>
+                    <input type="text">
+                </div>
+                <div>
+                    <span>小区名字</span>
+                    <input type="text">
+                </div>
+                <div>
+                    <span>户型信息</span>
+                    <input type="text">
+                </div>
+                <div>
+                    <span>当前户主</span>
+                    <input type="text">
+                </div>
+                <div>
+                    <span>联系电话</span>
+                    <input type="text">
+                </div>
+                <div class="upload">
+                    <span>添加图片</span>
+                    <ul id="addphoto">
+                        <li>
+                            <span>添加</span>
+                            <input id="showpic" type="file" accept="image/png, image/jpeg, image/gif, image/jpg">
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <span id="summary">介绍</span>
+                    <textarea name="" id="" cols="50" rows="5"></textarea>
+                </div>
+                <p>
+                    <button id="upload_btn">提交</button>
+                </p>
+            </form>
+        </div>
+    </div>
+</body>
+<script src="/javascripts/jquery-3.2.1.js"></script>
+<script>
+    $(function () {
+        $.ajax({
+            type: 'GET',
+            url: '/data/read',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                for (var i = 0; i < data.length; i++) {
+                    var { city, address, district, houseType, owner, uphone } = data[i];
+                    var html = `
+                        <tr>
+                            <td>
+                                <a href="">${city}</a>
+                            </td>
+                            <td>
+                                <a href="">${address}</a>
+                            </td>
+                            <td>
+                                <a href="">${district}</a>
+                            </td>
+                            <td>
+                                <a href="">${houseType}</a>
+                            </td>
+                            <td>
+                                <div class="small-pic">
+                                    <img src="../images/uploads/h1/p1.jpg" alt="">
+                                    <img src="../images/uploads/h1/p2.jpg" alt="">
+                                    <img src="../images/uploads/h1/p3.jpg" alt="">
+                                </div>
+                            </td>
+                            <td>
+                                <a href="">${owner}</a>
+                            </td>
+                            <td>
+                                <a href="">${uphone}</a>
+                            </td>
+                            <td>
+                                <a href="">编辑</a>/
+                                <a href="">删除</a>
+                            </td>
+                        </tr>`;
+                    $("#show-info").append(html);
+                }
+            },
+            err: function (err) {
+                console.log(err);
+            }
+        });
+    });
+
+    //预览图片
+    $("#showpic").on("change", function () {
+        var filePath = $(this).val(),
+            fileFormat = filePath.substring(filePath.lastIndexOf(".")).toLowerCase(),
+            imgBase64 = '',
+            fileObj = document.getElementById('showpic').files[0];
+        console.log(fileObj);
+
+        if (!fileFormat.match(/.png|.jpg|.jpeg/)) {
+            alert('上传错误,文件格式必须为:png/jpg/jpeg');
+            return;
+        }
+
+        compress(fileObj, function (imgBase64) {
+            imgBase64 = imgBase64;
+            let html = `
+               <li><a href="#"><img src="${imgBase64}"></a></li>
+            `;
+            $('#addphoto').append(html);
+        });
+    });
+
+    // 不对图片进行压缩，直接转成base64  
+    function directTurnIntoBase64(fileObj, callback) {
+        var r = new FileReader();
+        // 转成base64  
+        r.onload = function () {
+            //变成字符串  
+            imgBase64 = r.result;
+            console.log(imgBase64);
+            callback(imgBase64);
+        }
+        r.readAsDataURL(fileObj);    //转成Base64格式  
+    }
+
+    // 对图片进行压缩  
+    function compress(fileObj, callback) {
+        if (typeof (FileReader) === 'undefined') {
+            console.log("当前浏览器内核不支持base64图标压缩");
+            //调用上传方式不压缩    
+            directTurnIntoBase64(fileObj, callback);
+        } else {
+            try {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var image = $('<img/>');
+                    image.on("load",function () {
+                        square = 700,   //定义画布的大小，也就是图片压缩之后的像素  
+                            canvas = document.createElement('canvas'),
+                            context = canvas.getContext('2d'),
+                            imageWidth = 0,    //压缩图片的大小  
+                            imageHeight = 0,
+                            offsetX = 0,
+                            offsetY = 0,
+                            data = '';
+
+                        canvas.width = square;
+                        canvas.height = square;
+                        context.clearRect(0, 0, square, square);
+
+                        if (this.width > this.height) {
+                            imageWidth = Math.round(square * this.width / this.height);
+                            imageHeight = square;
+                            offsetX = - Math.round((imageWidth - square) / 2);
+                        } else {
+                            imageHeight = Math.round(square * this.height / this.width);
+                            imageWidth = square;
+                            offsetY = - Math.round((imageHeight - square) / 2);
+                        }
+                        context.drawImage(this, offsetX, offsetY, imageWidth, imageHeight);
+                        var data = canvas.toDataURL('image/jpeg');
+                        //压缩完成执行回调    
+                        callback(data);
+                    });
+                    image.attr('src', e.target.result);
+                };
+                reader.readAsDataURL(fileObj);
+            } catch (e) {
+                console.log("压缩失败!");
+                //调用直接上传方式  不压缩   
+                directTurnIntoBase64(fileObj, callback);
+            }
+        }
+    }
+
+    //异步上传
+    $("#upload_btn").click(function(){
+       
+    });
+</script>
+
+</html>

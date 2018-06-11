@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>后台管理系统</title>
+  <link rel='stylesheet' href='/stylesheets/login.css' />
+</head>
+
+<body>
+  <div class="head">
+    <p>管理员登录页面</p>
+  </div>
+  <div class="login-box">
+    <div class="login-body">
+      <div class="login-input">
+        <span>账号&nbsp;</span>
+        <input type="text" id="admin">
+      </div>
+      <div class="login-input">
+        <span>密码&nbsp;</span>
+        <input type="password" id="apwd">
+      </div>
+        <button id="btnLogin">登录</button>
+    </div>
+  </div>
+</body>
+<script src="/javascripts/jquery-3.2.1.js"></script>
+<script>
+    //var session = require('express-session');
+    $("#btnLogin").click(function(){
+      let admin=$("#admin").val();
+      let apwd=$("#apwd").val();
+      //console.log(admin,apwd)
+      $.ajax({
+        type:'POST',
+        url:'/data/login',
+        data:{admin:admin,apwd:apwd},
+        success:function(data){
+          // if(data.status){
+          //   window.location.href='/index';
+          // }else{
+          //   alert('登录失败');
+          // }
+          if(data.status===1){
+            window.location.href='/';
+          }else{
+            alert(data.msg);
+          }
+        },
+        error:function(){
+          alert('登录失败');
+        },
+        dataType:'json'
+      })
+    });
+</script>
+</html>
